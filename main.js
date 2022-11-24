@@ -58,23 +58,26 @@ const posts = [
 
 const wrapper = document.getElementById("container");
 
-posts.forEach(post => {
+const likeCounters = [];
+
+const likesArray = [];
+
+for (let i = 0; i < posts.length; i++) {
+    let post = posts[i];
+
     let img = `<img class="profile-pic" src=${post.author.image} alt="${post.author.name}">`
 
     if(post.author.image === null) {
         img = `<div class="profile-pic-default"><span>${getFirstLetters(post.author.name)}</span></div>`;
     }
 
-    let year = post.created.slice(0, 4);
+    post.created = italianDate(post.created);
 
-    let month = post.created.slice(5, 7);
+    let postHtml = document.createElement("div");
 
-    let day = post.created.slice(8, 10);
+    postHtml.classList.add("post");
 
-    post.created = `${day}-${month}-${year}`
-
-    wrapper.innerHTML += `
-    <div class="post">
+    postHtml.innerHTML = `
         <div class="post__header">
             <div class="post-meta">                    
                 <div class="post-meta__icon">
@@ -99,19 +102,17 @@ posts.forEach(post => {
                     </a>
                 </div>
                 <div class="likes__counter">
-                    Piace a <b id="like-counter-1" class="js-likes-counter">${post.likes}</b> persone
+                    Piace a <b id="like-counter-${post.id}" class="js-likes-counter">${post.likes}</b> persone
                 </div>
             </div> 
-        </div>            
-    </div>`;
-});
+        </div>`
+    ;
 
-const likeBtns = document.querySelectorAll(".js-like-button");
+    wrapper.appendChild(postHtml);
+    
+    likeBtn = document.querySelector(`[data-postid="${post.id}"]`);
 
-const likeCounters = document.querySelectorAll(".js-likes-counter")
-
-for (let i = 0; i < likeBtns.length; i++) {
-    let likeBtn = likeBtns[i];
+    likeCounters.push(document.getElementById(`like-counter-${post.id}`));
 
     let likeCounter = likeCounters[i];
 
@@ -119,18 +120,27 @@ for (let i = 0; i < likeBtns.length; i++) {
         function(event) {
             event.preventDefault();
 
+            const like = post.id;
+
+            const index = likesArray.indexOf(like);
+
             if(!this.classList.contains("like-button--liked")) {
 
-                changeClass(likeBtn, likeCounter, 1, "like-button--liked", i);
+                changeClass(this, likeCounter, 1, "like-button--liked", i);
+
+                likesArray.push(like)
 
             } else {
 
-                changeClass(likeBtn, likeCounter, -1, "like-button", i);
+                changeClass(this, likeCounter, -1, "like-button", i);
+
+                likesArray.splice(index, 1);
 
             }
         }
-    )
+    )   
 }
+
 
 function getFirstLetters(str) {
     const firstLetters = str
@@ -148,3 +158,15 @@ function changeClass(element, counter, operator, classString, index) {
 
     counter.innerHTML = posts[index].likes;
 } 
+
+function italianDate (element) {
+    let year = element.slice(0, 4);
+
+    let month = element.slice(5, 7);
+
+    let day = element.slice(8, 10);
+
+    element = `${day}-${month}-${year}`;
+
+    return element
+}
